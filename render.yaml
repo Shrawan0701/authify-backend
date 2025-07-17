@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: authify-backend
+    env: docker
+    branch: main
+    rootDir: .
+    dockerfilePath: Dockerfile
+    healthCheckPath: /api/v1.0/is-authenticated
+    plan: free
+    envVars:
+      - key: APP_NAME
+        value: Authify
+      - key: APP_SUPPORT_EMAIL
+        value: support@authify.com
+      - key: MAIL_PROTOCOL
+        value: smtp
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: JWT_EXPIRATION_MS
+        value: "86400000"
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
