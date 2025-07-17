@@ -7,6 +7,12 @@ WORKDIR /app
 
 COPY pom.xml .
 COPY src ./src
+COPY .mvn .mvn
+COPY mvnw .
+COPY mvnw.cmd .
+
+
+RUN chmod +x mvnw # <--- ADD THIS LINE: Make mvnw executable
 
 
 RUN ./mvnw clean install -DskipTests --no-transfer-progress
