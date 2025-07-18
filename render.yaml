@@ -5,13 +5,8 @@ services:
     branch: main
     rootDir: .
     dockerfilePath: Dockerfile
-    healthCheckPath: /api/v1.0/is-authenticated
     plan: free
     envVars:
-      - key: APP_NAME
-        value: Authify
-      - key: APP_SUPPORT_EMAIL
-        value: support@authify.com
       - key: MAIL_PROTOCOL
         value: smtp
       - key: DB_URL
