@@ -35,8 +35,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             "/api/v1.0/reset-password",
             "/api/v1.0/logout",
             "/api/v1.0/send-otp",
-            "/api/v1.0/verify-otp",
-            "/api/v1.0/is-authenticated"
+            "/api/v1.0/verify-otp"
+
 
     );
 
