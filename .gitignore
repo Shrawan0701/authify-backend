@@ -33,5 +33,5 @@ build/
 .vscode/
 
 # .gitignore
-src/main/resources/application.properties
+src/main/resources/sample-application.properties
 
