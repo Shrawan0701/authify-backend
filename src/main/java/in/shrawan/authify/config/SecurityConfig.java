@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/api/v1.0/send-reset-otp",
                                 "/api/v1.0/reset-password",
                                 "/api/v1.0/logout",
-                                "/api/v1.0/send-otp",   // <--- ADD THIS LINE
+                                "/api/v1.0/send-otp",
                                 "/api/v1.0/verify-otp",
                                 "/api/v1.0/is-authenticated"
                         ).permitAll()
