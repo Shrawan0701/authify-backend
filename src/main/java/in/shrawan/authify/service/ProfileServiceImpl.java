@@ -31,7 +31,7 @@ public class ProfileServiceImpl implements ProfileService {
             // Generate OTP for verification
             String otp = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
             newProfile.setVerifyOtp(otp);
-            newProfile.setVerifyOtpExpireAt(System.currentTimeMillis() + (15 * 60 * 1000)); // 15 minutes expiry
+            newProfile.setVerifyOtpExpireAt(System.currentTimeMillis() + (60 * 60 * 1000)); // 15 minutes expiry
 
             newProfile = userRepository.save(newProfile); // Save user with OTP
 
