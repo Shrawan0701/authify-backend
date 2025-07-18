@@ -20,6 +20,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -98,6 +99,30 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         }
 
+    }
+
+    @PostMapping("/verify-reset-otp") // <--- ADD THIS NEW ENDPOINT
+    public void verifyResetPasswordOtp(@RequestBody Map<String, Object> request) { // <--- ADD THIS NEW METHOD
+        String email = (String) request.get("email");
+        String otp = (String) request.get("otp");
+
+        if (email == null || email.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
+        }
+        if (otp == null || otp.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP is required");
+        }
+
+        try {
+            profileService.verifyResetOtp(email, otp); // Call the new ProfileService method
+        } catch (UsernameNotFoundException ex) { // Catch specific UserNotFound if ProfileService throws it
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
+        } catch (ResponseStatusException ex) { // Catch custom status exceptions from ProfileService (e.g., Invalid/Expired OTP)
+            throw ex; // Re-throw with original status (e.g., 400 BAD_REQUEST)
+        } catch (Exception e) {
+
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
     }
 
     @PostMapping("/reset-password")

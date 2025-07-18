@@ -150,6 +150,28 @@ public class ProfileServiceImpl implements ProfileService {
         log.info("ProfileService: Email verified successfully for: {}", email);
     }
 
+    public void verifyResetOtp(String email, String otp) { // <--- ADD THIS NEW METHOD
+        log.debug("ProfileService: Verifying RESET OTP for email: {}", email);
+        UserEntity existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+
+        // Check if OTP matches the 'reset' field, NOT 'verifyOtp'
+        if (existingUser.getReset() == null || !existingUser.getReset().equals(otp)) {
+            log.warn("ProfileService: Invalid RESET OTP provided for email: {}", email);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Otp");
+        }
+        // Check if reset OTP has expired (milliseconds comparison)
+        if (existingUser.getResetOtpExpiredAt() == null || existingUser.getResetOtpExpiredAt() < System.currentTimeMillis()) {
+            log.warn("ProfileService: RESET OTP expired for email: {}", email);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Otp expired");
+        }
+
+        // If OTP is valid and not expired, you can optionally clear it here,
+        // or let the final resetPassword method clear it.
+        // For now, we'll just log success and allow progression.
+        log.info("ProfileService: RESET OTP successfully verified for: {}", email);
+    }
+
     private ProfileResponse convertToProfileResponse(UserEntity newProfile) {
         return ProfileResponse.builder()
                 .name(newProfile.getName())
