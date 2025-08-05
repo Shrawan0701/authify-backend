@@ -79,13 +79,10 @@ public class AuthController {
 
     }
 
-    // in.shrawan.authify.controller.AuthController.java
 
     @GetMapping("/is-authenticated")
     private ResponseEntity<Boolean> isAuthenticated(@CurrentSecurityContext(expression = "authentication?.name") String email) {
-        // If 'email' is null, it indicates no authentication object (rare, but good for safety).
-        // If 'email' is "anonymousUser", it means the request is not authenticated.
-        // Otherwise, it's an authenticated user's email.
+       
         boolean authenticated = (email != null && !"anonymousUser".equals(email));
         return ResponseEntity.ok(authenticated);
     }
@@ -101,8 +98,8 @@ public class AuthController {
 
     }
 
-    @PostMapping("/verify-reset-otp") // <--- ADD THIS NEW ENDPOINT
-    public void verifyResetPasswordOtp(@RequestBody Map<String, Object> request) { // <--- ADD THIS NEW METHOD
+    @PostMapping("/verify-reset-otp") 
+    public void verifyResetPasswordOtp(@RequestBody Map<String, Object> request) { 
         String email = (String) request.get("email");
         String otp = (String) request.get("otp");
 
@@ -114,11 +111,11 @@ public class AuthController {
         }
 
         try {
-            profileService.verifyResetOtp(email, otp); // Call the new ProfileService method
-        } catch (UsernameNotFoundException ex) { // Catch specific UserNotFound if ProfileService throws it
+            profileService.verifyResetOtp(email, otp); 
+        } catch (UsernameNotFoundException ex) { 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
-        } catch (ResponseStatusException ex) { // Catch custom status exceptions from ProfileService (e.g., Invalid/Expired OTP)
-            throw ex; // Re-throw with original status (e.g., 400 BAD_REQUEST)
+        } catch (ResponseStatusException ex) { 
+            throw ex; 
         } catch (Exception e) {
 
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -136,10 +133,10 @@ public class AuthController {
 
     }
 
-    @PostMapping("/send-otp") // This is the sendVerifyOtp method
-    public void sendVerifyOtp(@RequestParam String email) { // <--- CHANGE HERE: Accept email directly
+    @PostMapping("/send-otp") 
+    public void sendVerifyOtp(@RequestParam String email) { 
         try {
-            // Now, 'email' will come from the frontend, not security context
+            
             profileService.sendOtp(email);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
@@ -147,12 +144,12 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public void verifyEmail(@RequestBody Map<String, Object> request) { // <--- MODIFIED: ONLY take @RequestBody here
-        // Extract both email and otp from the request body
-        String email = (String) request.get("email"); // <--- GET EMAIL FROM REQUEST BODY
-        String otp = (String) request.get("otp");     // <--- GET OTP FROM REQUEST BODY
+    public void verifyEmail(@RequestBody Map<String, Object> request) { 
+        
+        String email = (String) request.get("email"); 
+        String otp = (String) request.get("otp");     
 
-        // Basic validation for presence
+       
         if (email == null || email.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
         }
@@ -161,10 +158,10 @@ public class AuthController {
         }
 
         try {
-            // Now, pass the email (from request body) to your service
+          
             profileService.verifyOtp(email, otp);
         } catch (Exception e) {
-            // Consider more specific exceptions from profileService for better error messages
+            
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
