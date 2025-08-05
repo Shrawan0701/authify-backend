@@ -8,7 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j; // <--- ADD THIS IMPORT
+import lombok.extern.slf4j.Slf4j; 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,13 +21,13 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
-@Slf4j // <--- ADD THIS ANNOTATION
+@Slf4j 
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final AppUserDetailsService appUserDetailsService;
     private final JwtUtil jwtUtil;
 
-    // Ensure this list is up-to-date with all your public /api/v1.0/ endpoints
+
     private static final List<String> PUBLIC_URLS = List.of(
             "/api/v1.0/login",
             "/api/v1.0/register",
@@ -46,77 +46,76 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        log.debug("JWT Filter: Processing request for path: {}", path); // <--- DEBUG LOG
+        log.debug("JWT Filter: Processing request for path: {}", path); 
 
-        // Check if the current request path is a public URL
+        
         if (PUBLIC_URLS.contains(path)) {
-            log.debug("JWT Filter: Path {} is public, skipping JWT validation.", path); // <--- DEBUG LOG
+            log.debug("JWT Filter: Path {} is public, skipping JWT validation.", path); 
             filterChain.doFilter(request, response);
-            return; // Exit filter early for public URLs
+            return; 
         }
 
         String jwt = null;
         String email = null;
 
-        // 1: Check Authorization header for Bearer token
+        
         final String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            log.debug("JWT Filter: Found JWT in Authorization header."); // <--- DEBUG LOG
+            log.debug("JWT Filter: Found JWT in Authorization header."); 
         }
 
-        // 2: If not found in header, check cookies
+        
         if (jwt == null) {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
-                    if ("jwt".equals(cookie.getName())) { // Your cookie name is 'jwt'
+                    if ("jwt".equals(cookie.getName())) { 
                         jwt = cookie.getValue();
-                        log.debug("JWT Filter: Found JWT in cookie named '{}'.", cookie.getName()); // <--- DEBUG LOG
+                        log.debug("JWT Filter: Found JWT in cookie named '{}'.", cookie.getName()); 
                         break;
                     }
                 }
             } else {
-                log.debug("JWT Filter: No cookies found in request."); // <--- DEBUG LOG
+                log.debug("JWT Filter: No cookies found in request."); 
             }
         } else {
-            log.debug("JWT Filter: JWT already found in header, skipping cookie check."); // <--- DEBUG LOG
+            log.debug("JWT Filter: JWT already found in header, skipping cookie check."); 
         }
 
-        // 3: Validate token and set security context
+   
         if (jwt != null) {
             try {
-                // Extract email from JWT
+              
                 email = jwtUtil.extractEmail(jwt);
-                log.debug("JWT Filter: Extracted email '{}' from JWT.", email); // <--- DEBUG LOG
+                log.debug("JWT Filter: Extracted email '{}' from JWT.", email);
 
-                // If email extracted and no existing authentication in context
+                
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = this.appUserDetailsService.loadUserByUsername(email);
-                    log.debug("JWT Filter: Loaded UserDetails for email '{}'.", email); // <--- DEBUG LOG
+                    log.debug("JWT Filter: Loaded UserDetails for email '{}'.", email); 
 
-                    // Validate the token against user details
+               
                     if (jwtUtil.validateToken(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authenticationToken =
                                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                        log.debug("JWT Filter: Authentication set for user '{}'.", email); // <--- DEBUG LOG
+                        log.debug("JWT Filter: Authentication set for user '{}'.", email); 
                     } else {
-                        log.debug("JWT Filter: JWT validation failed for user '{}' (token invalid or expired).", email); // <--- DEBUG LOG
+                        log.debug("JWT Filter: JWT validation failed for user '{}' (token invalid or expired).", email); 
                     }
                 } else {
-                    log.debug("JWT Filter: Email is null ({}) OR Authentication already exists (current: {}).", email, SecurityContextHolder.getContext().getAuthentication()); // <--- DEBUG LOG
+                    log.debug("JWT Filter: Email is null ({}) OR Authentication already exists (current: {}).", email, SecurityContextHolder.getContext().getAuthentication()); 
                 }
             } catch (Exception e) {
-                // Catch any exception during token extraction or validation (e.g., SignatureException, ExpiredJwtException)
-                log.error("JWT Filter: Error during token extraction or validation: {}", e.getMessage(), e); // <--- DEBUG LOG (with 'e' for stack trace)
+               
+                log.error("JWT Filter: Error during token extraction or validation: {}", e.getMessage(), e); 
             }
         } else {
-            log.debug("JWT Filter: No JWT found, proceeding without authentication. Request to protected path will be denied if not authenticated."); // <--- DEBUG LOG
+            log.debug("JWT Filter: No JWT found, proceeding without authentication. Request to protected path will be denied if not authenticated."); 
         }
 
-        // Continue the filter chain
         filterChain.doFilter(request, response);
     }
 }
